@@ -1,12 +1,19 @@
+# Adaptado por CNTA desde el compose de upstream (conservado en
+# docker-compose.yml.upstream).
+#
+# Cambios respecto a upstream:
+#   - red openagri_oa_network -> web-network, conservando el alias 'gatekeeper'.
+#     El alias importa: INTERNAL_GK_URL vale por defecto http://gatekeeper:8001/
+#     y GateKeeper se llama a si mismo por esa URL durante el login.
+#   - restart: no -> unless-stopped
+#   - imagen local en vez de ghcr.io
 services:
   web:
-    image: ghcr.io/${DOCKER_REGISTRY}/openagri-gatekeeper:${TAG}
-    container_name: django_gatekeeper
-    restart: no
     build:
       context: .
-      args:
-        SOURCE_REPO: ${SOURCE_REPO}
+    image: cnta/openagri-gatekeeper:local
+    container_name: django_gatekeeper
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
@@ -15,8 +22,7 @@ services:
       - media_volume:/var/www/media
       - logs_volume:/var/www/logs
     networks:
-      default: {}
-      openagri_oa_network:
+      web-network:
         aliases:
           - gatekeeper
     ports:
@@ -28,5 +34,5 @@ volumes:
   logs_volume:
 
 networks:
-  openagri_oa_network:
+  web-network:
     external: true

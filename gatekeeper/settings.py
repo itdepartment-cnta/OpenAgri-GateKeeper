@@ -187,6 +187,8 @@ LOGOUT_REDIRECT_URL = 'login'  # Redirect to the login page after logging out
 
 
 MIDDLEWARE = [
+    # PARCHE CNTA: el primero, para servir bajo subdirectorio.
+    'gatekeeper.custom_middleware.ScriptNameMiddleware.ScriptNameMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -279,7 +281,9 @@ USE_TZ = True
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # STATIC_URL is the URL to use when referring to static files (like CSS, JavaScript, and images) in templates.
-STATIC_URL = "/assets/"
+# PARCHE CNTA: configurable, para que coincida con el prefijo del proxy
+# cuando GateKeeper se sirve bajo un subdirectorio.
+STATIC_URL = os.getenv("DJANGO_STATIC_URL", "/assets/")
 
 # This setting defines the list of directories where Django will look for additional static files, in addition to
 # each app's static folder.
