@@ -33,6 +33,28 @@ def health_check(request):
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
+# PARCHE CNTA
+def logout_redirect(request):
+    """Cierra la sesion de navegador de GateKeeper y vuelve a donde se pida.
+
+    Upstream solo expone cierre de sesion en api/logout/ —servidor a servidor,
+    para invalidar tokens— y en admin/logout/, que redirige a una ruta absoluta
+    del admin. Ninguna sirve para que una aplicacion cierre la sesion del
+    usuario y lo devuelva a su propia pagina.
+
+    Sin esto, 'Cerrar sesion' en SheepCare no cerraba nada: la sesion de
+    GateKeeper sobrevivia y volver a entrar no pedia credenciales.
+    """
+    logout(request)
+    destino = request.GET.get("next", "") or "/"
+    # Solo destinos relativos: un 'next' absoluto convertiria esto en una
+    # redireccion abierta, util para llevar a alguien a un sitio que imite
+    # la pagina de login.
+    if not destino.startswith("/") or destino.startswith("//"):
+        destino = "/"
+    return HttpResponseRedirect(destino)
+
+
 def admin_logout_redirect(request):
     logout(request)
     return HttpResponseRedirect("/admin/login/?next=/admin/")
@@ -43,6 +65,8 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
 
     path('admin/logout/', admin_logout_redirect, name='admin_logout_redirect'),
+    # PARCHE CNTA
+    path('logout/', logout_redirect, name='logout_redirect'),
     path('admin/', admin.site.urls),
 
     path('login/', LoginView.as_view(), name='login'),
