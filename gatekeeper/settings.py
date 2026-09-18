@@ -117,6 +117,22 @@ USE_X_FORWARDED_HOST = True
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
+# PARCHE CNTA: nombres de cookie propios.
+#
+# GateKeeper se sirve bajo /gatekeeper/ del mismo dominio que Farm Calendar,
+# que esta en /farmcalendar/. Las cookies NO se acotan por ruta salvo que se
+# diga, asi que ambos Django escribian 'csrftoken' y 'sessionid' con Path=/ y
+# se pisaban entre si.
+#
+# Hoy no se nota porque nadie usa los dos formularios seguidos, pero con el
+# SSO el flujo pasa por los dos, y el sintoma seria un 403 de CSRF
+# intermitente segun el orden de visita: de los que no hay quien reproduzca.
+#
+# Se renombran los de GateKeeper y se dejan intactos los de Farm Calendar,
+# que es el que llevaba mas tiempo con ellos.
+CSRF_COOKIE_NAME = 'gk_csrftoken'
+SESSION_COOKIE_NAME = 'gk_sessionid'
+
 # Scope CORS to API paths
 CORS_URLS_REGEX = r"^/api/.*$"
 
