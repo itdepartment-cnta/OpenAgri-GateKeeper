@@ -42,6 +42,7 @@ def _emitir_tokens(user):
     refresh["first_name"] = user.first_name
     refresh["last_name"] = user.last_name
     refresh["uuid"] = str(user.uuid)
+    refresh["tenant"] = str(user.tenant_id) if user.tenant_id else None
     return str(refresh.access_token), str(refresh)
 
 

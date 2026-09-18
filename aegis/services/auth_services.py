@@ -45,6 +45,10 @@ def authenticate_user(username: str, password: str):
     refresh["first_name"] = user.first_name
     refresh["last_name"] = user.last_name
     refresh["uuid"] = str(user.uuid)
+    # PARCHE CNTA: el tenant viaja en el token para que los servicios puedan
+    # filtrar sin consultar a GateKeeper en cada peticion. Es el UUID del
+    # Tenant, que es el identificador canonico de empresa en todo el sistema.
+    refresh["tenant"] = str(user.tenant_id) if user.tenant_id else None
 
     access_token = str(refresh.access_token)
     refresh_token = str(refresh)
