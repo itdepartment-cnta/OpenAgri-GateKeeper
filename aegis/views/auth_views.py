@@ -66,10 +66,15 @@ class LoginView(FormView):
                 refresh_token = data["refresh"]
 
                 # Determine the redirect URL
-                if next_url == "FarmCalendar":
-                    next_url = settings.AVAILABLE_SERVICES.get(next_url, {}).get('post_auth')
-                elif next_url == "IrrigationManagement":
-                    next_url = settings.AVAILABLE_SERVICES.get(next_url, {}).get('post_auth')
+                # PARCHE CNTA: upstream comparaba next_url con literales, uno
+                # por servicio, asi que dar de alta uno nuevo obligaba a tocar
+                # este fichero ademas de settings. Las ramas eran identicas
+                # entre si, de modo que una busqueda en el diccionario hace lo
+                # mismo y deja el alta de servicios en pura configuracion.
+                # Es lo que el propio comentario de AVAILABLE_SERVICES apunta
+                # como intencion.
+                if next_url in settings.AVAILABLE_SERVICES:
+                    next_url = settings.AVAILABLE_SERVICES[next_url].get('post_auth')
                 elif not next_url:
                     next_url = self.success_url
 

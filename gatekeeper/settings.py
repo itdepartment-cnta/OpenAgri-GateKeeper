@@ -37,6 +37,12 @@ AVAILABLE_SERVICES = {
     {
         'api': os.getenv('IRM_API', 'http://127.0.0.1:5173/api/'),
         'post_auth': os.getenv('IRM_POST_AUTH', 'http://127.0.0.1:5173/post_auth/')
+    },
+    # PARCHE CNTA
+    'SheepCare':
+    {
+        'api': os.getenv('SHEEPCARE_API', 'http://backend-public:8000/api/'),
+        'post_auth': os.getenv('SHEEPCARE_POST_AUTH', 'http://127.0.0.1:9090/post-auth')
     }
 }
 
@@ -331,7 +337,13 @@ SIMPLE_JWT = {
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
-    'USER_ID_FIELD': 'uuid',
+    # PARCHE CNTA: 'uuid' -> 'username'.
+    # Este campo decide que va en el claim user_id. Farm Calendar lo
+    # resuelve contra el username de su auth_user, asi que con 'uuid' y
+    # AUTO_CREATE_AUTH_USER activo creaba usuarios llamados como un UUID,
+    # dejando ilegible la autoria de simple_history. username tambien es
+    # unico, asi que SimpleJWT sigue resolviendo igual de bien.
+    'USER_ID_FIELD': 'username',
     'USER_ID_CLAIM': 'user_id',
     'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
 }
