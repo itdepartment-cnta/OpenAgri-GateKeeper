@@ -33,4 +33,7 @@ media/
 generate_folder_structure.py
 
 testing/
-docs/.credenciales-iniciales
+# Credenciales iniciales, en cualquier carpeta. El patron anterior solo
+# cubria docs/ y el fichero vive en la raiz, asi que no lo ignoraba.
+.credenciales-iniciales
+**/.credenciales-iniciales
