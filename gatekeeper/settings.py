@@ -438,3 +438,7 @@ FARM_CALENDAR = os.getenv('FARM_CALENDAR')
 IRM = os.getenv('IRM')
 
 GATEKEEPER_URL = os.getenv('GATEKEEPER_URL')
+
+# Shared secret for POST /api/tenant-users/ (user provisioning by a trusted backend).
+# Empty = endpoint disabled.
+USER_PROVISIONING_KEY = os.getenv('GATEKEEPER_PROVISIONING_KEY', '')

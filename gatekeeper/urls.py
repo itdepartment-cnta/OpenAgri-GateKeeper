@@ -16,6 +16,7 @@ from aegis.views.api.auth_views import (
     LoginAPIView, LogoutAPIView, TokenValidationAPIView, MeAPIView, FarmCalendarScopeAPIView,
     FarmCalendarCatalogAPIView
 )
+from aegis.views.api.user_provisioning_views import TenantUserCreateAPIView, ChangePasswordAPIView
 from aegis.views.api.service_registry_views import (ServiceDirectoryAPIView, RegisterServiceAPIView,
                                                     DeleteServiceAPIView, NewReverseProxyAPIView)
 from .common import custom_page_not_found_view
@@ -78,6 +79,8 @@ urlpatterns = [
     path('api/login/', LoginAPIView.as_view(), name='api_login'),
     path('api/logout/', LogoutAPIView.as_view(), name='api_logout'),
     # path('api/register/', RegisterAPIView.as_view(), name='api_register'),
+    path('api/tenant-users/', TenantUserCreateAPIView.as_view(), name='api_tenant_users'),
+    path('api/change-password/', ChangePasswordAPIView.as_view(), name='api_change_password'),
     path('api/validate_token/', TokenValidationAPIView.as_view(), name='validate_token'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
