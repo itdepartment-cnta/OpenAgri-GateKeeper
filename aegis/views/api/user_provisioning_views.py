@@ -2,6 +2,7 @@
 
 import hmac
 import logging
+import uuid
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -34,7 +35,8 @@ class TenantUserCreateAPIView(APIView):
     Whoever holds the key decides which tenant the user joins, so the key must stay
     on the server side.
 
-    Body: {"tenant_code": "...", "email": "...", "password": "..."}
+    Body: {"tenant_id": "<uuid>" | "tenant_code": "...", "email": "...", "password": "..."}
+    (`tenant_id` wins if both are sent).
 
     201 created | 400 invalid data | 401 bad key | 404 unknown tenant |
     409 email already registered (in any tenant, nothing is modified) | 503 disabled
@@ -51,20 +53,30 @@ class TenantUserCreateAPIView(APIView):
         if not hmac.compare_digest(provided.encode(), expected.encode()):
             return _error("Invalid provisioning key.", status.HTTP_401_UNAUTHORIZED, "invalid_key")
 
+        tenant_id = str(request.data.get("tenant_id") or "").strip()
         tenant_code = str(request.data.get("tenant_code") or "").strip().lower()
         email = str(request.data.get("email") or "").strip().lower()
         password = str(request.data.get("password") or "")
-        if not tenant_code or not email or not password:
-            return _error("tenant_code, email and password are required.", status.HTTP_400_BAD_REQUEST, "missing_fields")
+        if not (tenant_id or tenant_code) or not email or not password:
+            return _error(
+                "tenant_id (or tenant_code), email and password are required.",
+                status.HTTP_400_BAD_REQUEST, "missing_fields",
+            )
 
         try:
             validate_email(email)
         except ValidationError:
             return _error("Invalid email address.", status.HTTP_400_BAD_REQUEST, "invalid_email")
 
-        tenant = Tenant.objects.filter(code=tenant_code).first()
+        if tenant_id:
+            try:
+                tenant = Tenant.objects.filter(id=uuid.UUID(tenant_id)).first()
+            except ValueError:
+                return _error("Invalid tenant_id.", status.HTTP_400_BAD_REQUEST, "invalid_tenant_id")
+        else:
+            tenant = Tenant.objects.filter(code=tenant_code).first()
         if not tenant:
-            return _error(f"Tenant '{tenant_code}' was not found.", status.HTTP_404_NOT_FOUND, "tenant_not_found")
+            return _error("Tenant was not found.", status.HTTP_404_NOT_FOUND, "tenant_not_found")
 
         user_model = get_user_model()
         candidate = user_model(username=email, email=email)
