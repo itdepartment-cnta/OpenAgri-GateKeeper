@@ -27,6 +27,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # token["service_name"] = user.service_name
         token["uuid"] = str(getattr(user, "uuid", ""))
         token["service_access"] = resolve_service_entitlements_for_user(user)
+        # PARCHE CNTA: el tenant viaja tambien en el login por API. Sin esto el
+        # token del formulario de GateKeeper (que llama a /api/login/) no lo
+        # llevaba y SheepCare no publicaba nada en Farm Calendar, porque sin
+        # tenant no escribe. Mismo valor que authenticate_user() y _emitir_tokens().
+        if getattr(user, "tenant_id", None):
+            token["tenant"] = str(user.tenant_id)
         return token
 
     def validate(self, attrs):
